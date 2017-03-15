@@ -16,7 +16,7 @@ public class Main {
         	
         	JsonObject jsonObject = new JsonParser().parse(req.headers("user")).getAsJsonObject();
         	String email = jsonObject.get("user").getAsJsonObject().get("email").getAsString();
-        	String password = jsonObject.get("user").getAsJsonObject().get("email").getAsString();
+        	String password = jsonObject.get("user").getAsJsonObject().get("password").getAsString();
         	
         	Authentication auth = new Authentication();
         	try {
@@ -32,14 +32,23 @@ public class Main {
         });
         
         post("/register/:uuid", (req, res) -> {
-        	return "register uuid";
+        	
+        	String uuid = req.params(":uuid");
+        	JsonObject jsonObject = new JsonParser().parse(req.headers("user")).getAsJsonObject();
+        	String token = jsonObject.get("user").getAsJsonObject().get("token").getAsString();
+        	String signature = jsonObject.get("user").getAsJsonObject().get("signature").getAsString();
+        	
+        	// TODO: Check if token and signature is valid
+        	
+        	res.status(200);
+        	return res;
         });
         
         post("/login", (req, res) -> {
         	
         	JsonObject jsonObject = new JsonParser().parse(req.headers("user")).getAsJsonObject();
         	String email = jsonObject.get("user").getAsJsonObject().get("email").getAsString();
-        	String password = jsonObject.get("user").getAsJsonObject().get("email").getAsString();
+        	String password = jsonObject.get("user").getAsJsonObject().get("password").getAsString();
         	
         	Authentication auth = new Authentication();
         	try {
