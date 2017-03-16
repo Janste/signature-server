@@ -57,7 +57,7 @@ public class Main {
             	res.body("{\"token\":\"" + user.getToken() + "\",\"uuid\":\"" + user.getUUID() + "\"}");
     			return res.body();
         	} catch (IllegalArgumentException e) {
-        		res.status(422);
+        		res.status(401);
         		return e.getMessage();
         	}
         	

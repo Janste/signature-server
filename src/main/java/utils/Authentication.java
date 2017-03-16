@@ -8,28 +8,33 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 
 import business.Signature;
 import business.User;
+import dataAccessLayer.DatabaseHandler;
 
 public class Authentication {
 
 	public User register(String email, String password) throws IllegalArgumentException {
 		
-		// TODO: Add user to DB.
 		User user = new User();
 		user.setEmail(email);
 		user.setPassword(password);
-		user.setUUID("1");
-		return user;
+		
+		if (DatabaseHandler.getInstance().saveUser(user)) {
+			user.setUUID(Integer.toString(DatabaseHandler.getInstance().getUserUUID(email)));
+			return user;
+		} else {
+			throw new IllegalArgumentException("Email already in use");
+		}
 	}
 	
 	public User login(String email, String password) throws IllegalArgumentException {
-		
-		// TODO: Fetch user from DB.
-		User user = new User();
-		user.setEmail(email);
-		user.setPassword(password);
-		user.setUUID("1");
-		user.setToken(createToken(user.getEmail()));
-		return user;
+		User user = DatabaseHandler.getInstance().getUserByEmailAndPassword(email, password);
+		if (user != null) {
+			user.setToken(createToken(user.getEmail()));
+			return user;
+		} else {
+			throw new IllegalArgumentException("Invalid credentials");
+		}
+
 	}
 	
 	public User validateToken(String token) {
