@@ -3,9 +3,9 @@ package utils;
 public class Point {
 	private double x;
 	private double y;
-	private double t;
+	private long t;
 	
-	public Point(double x, double y, double time) {
+	public Point(double x, double y, long time) {
 		this.x = x;
 		this.y = y;
 		this.t = time;
@@ -19,7 +19,7 @@ public class Point {
 		return y;
 	}
 	
-	public double getTime() {
+	public long getTime() {
 		return t;
 	}
 }
