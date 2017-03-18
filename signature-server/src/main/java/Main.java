@@ -2,9 +2,11 @@ import static spark.Spark.*;
 
 import org.apache.log4j.BasicConfigurator;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import business.Signature;
 import business.User;
 import utils.Authentication;
 
@@ -72,12 +74,25 @@ public class Main {
         });
         
         post("/request/:uuid", (req, res) -> {
-        	return "post request uuid";
+        	JsonObject jsonObject = new JsonParser().parse(req.headers("user")).getAsJsonObject();
+        	//TODO check token
+        	JsonArray sigObject = new JsonParser().parse(req.headers("signature")).getAsJsonArray();
+        	Signature sig = new Signature(sigObject);
+        	
+        	//TODO load persisted sig and match
+        	//
+//        	if (!storedSig.match(sig)) {
+//        		res.status(401);
+//        		res.body("{\"error\": \"Invalid signature\" }"); 
+//        	}
+//        	else {
+//        		res.status(200);
+//        	}
+        	return res.body();
         });
         
         get("/request/:uuid", (req, res) -> {
         	return "get request uuid";
         });
-        
     }
 }
