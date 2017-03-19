@@ -47,16 +47,22 @@ public class Main {
         		return res.body();
         	}
         	
-        	// TODO: Check if token and signature is valid
-        	User user = new User();
-        	user.setUUID(uuid);
-        	Signature sig = new Signature(signature);
-        	user.updateSignature(sig);
+        	Authentication auth = new Authentication();
+        	User user = auth.validateToken(token);
         	
-        	DatabaseHandler.getInstance().saveSignature(user);
+        	if (user != null && uuid.equals(user.getUUID())) {
+        		Signature sig = new Signature(signature);
+            	user.updateSignature(sig);
+            	DatabaseHandler.getInstance().saveSignature(user);
+            	res.status(200);
+            	return "";
+        	} else {
+        		res.status(401);
+        		res.body("Invalid credentials");
+        		return res.body();
+        	}
         	
-        	res.status(200);
-        	return "";
+        	
         });
         
         post("/login", (req, res) -> {
