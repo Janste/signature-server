@@ -94,16 +94,18 @@ public class UserHelper {
 	public static User getUserByEmailAndPassword(Connection connection, String email, String password) {
 		User user = null;
 		try {
-			String sql = "SELECT * FROM USER WHERE email = ? AND password = ?;";
+			String sql = "SELECT * FROM USER WHERE email = ?;";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			statement.setString(1, email);
-			statement.setString(2, password);
 			ResultSet result = statement.executeQuery();
 			if (result.next()) {
-				user = new User();
-				user.setEmail(result.getString("email"));
-				user.setPassword(result.getString("password"));
-				user.setUUID(Integer.toString(result.getInt("uuid")));
+				String hashedPassword = result.getString("password");
+				if (hashedPassword.equals(password)) {
+					user = new User();
+					user.setEmail(result.getString("email"));
+					user.setPassword(result.getString("password"));
+					user.setUUID(Integer.toString(result.getInt("uuid")));
+				}
 			}
 			result.close();
 			statement.close();

@@ -9,14 +9,20 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import business.Signature;
 import business.User;
 import dataAccessLayer.DatabaseHandler;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class Authentication {
 
-	public User register(String email, String password) throws IllegalArgumentException {
+	public User register(String email, String password) throws IllegalArgumentException, NoSuchAlgorithmException {
 		
 		User user = new User();
 		user.setEmail(email);
-		user.setPassword(password);
+		
+		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+		messageDigest.update(password.getBytes());
+		String hashedPassword = new String(messageDigest.digest());
+		user.setPassword(hashedPassword);
 		
 		if (DatabaseHandler.getInstance().saveUser(user)) {
 			user.setUUID(Integer.toString(DatabaseHandler.getInstance().getUserUUID(email)));
@@ -26,8 +32,13 @@ public class Authentication {
 		}
 	}
 	
-	public User login(String email, String password) throws IllegalArgumentException {
-		User user = DatabaseHandler.getInstance().getUserByEmailAndPassword(email, password);
+	public User login(String email, String password) throws IllegalArgumentException, NoSuchAlgorithmException {
+		
+		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+		messageDigest.update(password.getBytes());
+		String hashedPassword = new String(messageDigest.digest());
+		
+		User user = DatabaseHandler.getInstance().getUserByEmailAndPassword(email, hashedPassword);
 		if (user != null) {
 			user.setToken(createToken(user.getEmail()));
 			return user;

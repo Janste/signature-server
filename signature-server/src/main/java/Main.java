@@ -13,12 +13,12 @@ import utils.Authentication;
 
 public class Main {
     public static void main(String[] args) {
-    	//BasicConfigurator.configure();
+    	BasicConfigurator.configure();
     	DatabaseHandler.getInstance();
         
         post("/register", (req, res) -> {
         	
-        	JsonObject jsonObject = new JsonParser().parse(req.headers("user")).getAsJsonObject();
+        	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
         	String email = jsonObject.get("user").getAsJsonObject().get("email").getAsString();
         	String password = jsonObject.get("user").getAsJsonObject().get("password").getAsString();
         	
@@ -61,7 +61,7 @@ public class Main {
         
         post("/login", (req, res) -> {
         	
-        	JsonObject jsonObject = new JsonParser().parse(req.headers("user")).getAsJsonObject();
+        	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
         	String email = jsonObject.get("user").getAsJsonObject().get("email").getAsString();
         	String password = jsonObject.get("user").getAsJsonObject().get("password").getAsString();
         	
