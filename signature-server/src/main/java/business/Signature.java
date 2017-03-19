@@ -1,5 +1,6 @@
 package business;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +17,8 @@ import signaturesdk.features.Sample;
 import signaturesdk.verification.Verification;
 import utils.Point;
 
-public class Signature {
+public class Signature implements Serializable {
+	private static final long serialVersionUID = 8032939853877615524L;
 	private List<List<Point>> sigData;
 	
 	public Signature(JsonArray data) {

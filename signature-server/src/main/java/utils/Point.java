@@ -1,6 +1,9 @@
 package utils;
 
-public class Point {
+import java.io.Serializable;
+
+public class Point implements Serializable {
+	private static final long serialVersionUID = -1818344562883838209L;
 	private double x;
 	private double y;
 	private long t;

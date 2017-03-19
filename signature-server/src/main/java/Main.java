@@ -6,13 +6,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import dataAccessLayer.DatabaseHandler;
 import business.Signature;
 import business.User;
 import utils.Authentication;
 
 public class Main {
     public static void main(String[] args) {
-    	BasicConfigurator.configure();
+    	//BasicConfigurator.configure();
+    	DatabaseHandler.getInstance();
         
         post("/register", (req, res) -> {
         	
@@ -34,16 +36,27 @@ public class Main {
         });
         
         post("/register/:uuid", (req, res) -> {
-        	
         	String uuid = req.params(":uuid");
-        	JsonObject jsonObject = new JsonParser().parse(req.headers("user")).getAsJsonObject();
-        	String token = jsonObject.get("user").getAsJsonObject().get("token").getAsString();
-        	String signature = jsonObject.get("user").getAsJsonObject().get("signature").getAsString();
+        	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject().get("user").getAsJsonObject();
+        	String token = jsonObject.get("token").getAsString();
+        	JsonArray signature = jsonObject.get("signature").getAsJsonArray();
+        	
+        	if (signature.size() < 1) {
+        		res.body("{\"error\": \"Invalid signature\"}");
+        		res.status(422);
+        		return res.body();
+        	}
         	
         	// TODO: Check if token and signature is valid
+        	User user = new User();
+        	user.setUUID(uuid);
+        	Signature sig = new Signature(signature);
+        	user.updateSignature(sig);
+        	
+        	DatabaseHandler.getInstance().saveSignature(user);
         	
         	res.status(200);
-        	return res;
+        	return "";
         });
         
         post("/login", (req, res) -> {
@@ -74,20 +87,22 @@ public class Main {
         });
         
         post("/request/:uuid", (req, res) -> {
-        	JsonObject jsonObject = new JsonParser().parse(req.headers("user")).getAsJsonObject();
+        	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
+        	String uuid = req.params(":uuid");
         	//TODO check token
-        	JsonArray sigObject = new JsonParser().parse(req.headers("signature")).getAsJsonArray();
+        	JsonArray sigObject = jsonObject.get("signature").getAsJsonArray();
         	Signature sig = new Signature(sigObject);
-        	
-        	//TODO load persisted sig and match
-        	//
-//        	if (!storedSig.match(sig)) {
-//        		res.status(401);
-//        		res.body("{\"error\": \"Invalid signature\" }"); 
-//        	}
-//        	else {
-//        		res.status(200);
-//        	}
+        	User user = new User();
+        	user.setUUID(uuid);
+        	Signature storedSig = DatabaseHandler.getInstance().getSignature(user);
+        	if (!storedSig.match(sig)) {
+        		res.status(401);
+        		res.body("{\"error\": \"Invalid signature\" }"); 
+        	}
+        	else {
+        		res.status(200);
+        		res.body("");
+        	}
         	return res.body();
         });
         

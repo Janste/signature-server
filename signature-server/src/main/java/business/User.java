@@ -48,6 +48,10 @@ public class User {
 		this.token = token;
 	}
 	
+	public Signature getSignature() {
+		return signature;
+	}
+	
 	public void updateSignature(Signature sig) {
 		signature = sig;
 	}

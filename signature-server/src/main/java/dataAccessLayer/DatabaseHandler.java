@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import business.Signature;
 import business.User;
 
 public class DatabaseHandler {
@@ -91,6 +92,14 @@ public class DatabaseHandler {
 	
 	public User getUserByEmailAndPassword(String email, String password) {
 		return UserHelper.getUserByEmailAndPassword(connection, email, password);
+	}
+	
+	public boolean saveSignature(User user) {
+		return SignatureHelper.saveSignature(connection, user);
+	}
+	
+	public Signature getSignature(User user) {
+		return SignatureHelper.getSignature(connection, user);
 	}
 	
 }
