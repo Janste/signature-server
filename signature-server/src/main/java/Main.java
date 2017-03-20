@@ -101,9 +101,15 @@ public class Main {
         		SignRequest signRequest = new SignRequest();
         		signRequest.setUUID(Integer.parseInt(user.getUUID()));
         		signRequest.setDocument(document);
-            	DatabaseHandler.getInstance().saveNewRequest(signRequest);
-            	res.status(200);
-            	return "";
+        		if (DatabaseHandler.getInstance().checkIfRequestAlreadyExists(signRequest)) {
+        			res.status(400);
+        			res.body("{\"error\": \"Document already exists\" }");
+            		return res.body();
+        		} else {
+        			DatabaseHandler.getInstance().saveNewRequest(signRequest);
+                	res.status(200);
+                	return "";
+        		}
         	} else {
         		res.status(401);
         		res.body("{\"error\": \"Invalid credentials\" }");
@@ -191,11 +197,10 @@ public class Main {
         		request.setUUID(Integer.parseInt(user.getUUID()));
         		request.setDocument(document);
         		
-        		Signature sig = DatabaseHandler.getInstance().checkIfRequestIsSigned(request);
-        		
-        		if (sig != null) {
+        		if (DatabaseHandler.getInstance().checkIfRequestIsSigned(request)) {
+        			Signature sig = DatabaseHandler.getInstance().getSignature(user);
         			res.status(200);
-        			res.body(sig.getAsJsonArray().getAsString());
+        			res.body(sig.getAsJsonString());
         		} else {
         			res.status(204);
         			res.body("{\"info\": \"Not signed\" }");

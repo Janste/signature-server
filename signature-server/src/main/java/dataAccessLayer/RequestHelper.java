@@ -1,9 +1,6 @@
 package dataAccessLayer;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,7 +9,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import business.Signature;
 import business.User;
 import utils.SignRequest;
 
@@ -37,6 +33,24 @@ public class RequestHelper {
 			e.printStackTrace();
 			return false;
 		}
+	}
+	
+	public static boolean checkIfRequestAlreadyExists(Connection connection, SignRequest request) {
+		boolean response = false;
+		try {
+			String sql = "SELECT * FROM REQUEST WHERE document = ?;";
+			PreparedStatement ps = connection.prepareStatement(sql);
+			ps.setString(1, request.getDocument());
+			ResultSet result = ps.executeQuery();
+			if (result.next()) {
+				response = true;
+			}
+			result.close();
+			ps.close();
+		} catch (SQLException e) {
+			response = true;
+		}
+		return response;
 	}
 	
 	public static List<SignRequest> checkForRequests(Connection connection, User user) {
@@ -87,9 +101,8 @@ public class RequestHelper {
 		}
 	}
 	
-	public static Signature checkIfRequestIsSigned(Connection connection, SignRequest request) {
-		Signature sig = null;
-		byte[] b = null;
+	public static boolean checkIfRequestIsSigned(Connection connection, SignRequest request) {
+		boolean response = false;
 		try {
 			String sql = "SELECT * FROM REQUEST WHERE uuid = ? AND document = ? AND signature IS NOT NULL;";
 			PreparedStatement ps = connection.prepareStatement(sql);
@@ -97,19 +110,14 @@ public class RequestHelper {
 			ps.setString(2, request.getDocument());
 			ResultSet result = ps.executeQuery();
 			if (result.next()) {
-				b = result.getBytes("signature");
-				ByteArrayInputStream bin = new ByteArrayInputStream(b);
-				ObjectInputStream objIn = new ObjectInputStream(bin);
-				
-				// TODO: it is not converting to Signature object
-				sig = (Signature)objIn.readObject();
+				response = true;
 			}
 			result.close();
 			ps.close();
-		} catch (SQLException | IOException | ClassNotFoundException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return sig;
+		return response;
 	}
 
 }

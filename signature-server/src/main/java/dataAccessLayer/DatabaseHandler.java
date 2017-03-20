@@ -108,6 +108,10 @@ public class DatabaseHandler {
 		return RequestHelper.saveNewRequest(connection, request);
 	}
 	
+	public boolean checkIfRequestAlreadyExists(SignRequest request) {
+		return RequestHelper.checkIfRequestAlreadyExists(connection, request);
+	}
+	
 	public List<SignRequest> checkForRequests(User user) {
 		return RequestHelper.checkForRequests(connection, user);
 	}
@@ -116,7 +120,7 @@ public class DatabaseHandler {
 		return RequestHelper.saveSignatureInRequest(connection, request);
 	}
 	
-	public Signature checkIfRequestIsSigned(SignRequest request) {
+	public boolean checkIfRequestIsSigned(SignRequest request) {
 		return RequestHelper.checkIfRequestIsSigned(connection, request);
 	}
 	

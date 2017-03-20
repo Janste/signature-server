@@ -37,17 +37,23 @@ public class Signature implements Serializable {
 		}
 	}
 	
-	public JsonArray getAsJsonArray() {
+	public String getAsJsonString() {
 		
-		JsonArray data = new JsonArray();
+		StringBuilder sb = new StringBuilder(); 
+		sb.append("[ [ ");
 		
-		for (List<Point> lp : sigData) {
-			for (Point p : lp) {
-				data.add((p.getX() + " " + p.getY() + " " + p.getTime()));
+		for (int i = 0; i < sigData.size(); i++) {
+			for (Point p : sigData.get(i)) {
+				sb.append("{ \"x\":" + p.getX() + ", \"y\":" + p.getY() + ", \"time\": " + p.getTime() + "}");
+				if (!(i + 1 == sigData.size())) {
+        			sb.append(",");
+        		}
 			}
 		}
 		
-		return data;
+		sb.append("] ]");
+		
+		return sb.toString();
 	}
 	
 	public boolean match(Signature other) {
