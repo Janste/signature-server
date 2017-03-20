@@ -37,6 +37,19 @@ public class Signature implements Serializable {
 		}
 	}
 	
+	public JsonArray getAsJsonArray() {
+		
+		JsonArray data = new JsonArray();
+		
+		for (List<Point> lp : sigData) {
+			for (Point p : lp) {
+				data.add((p.getX() + " " + p.getY() + " " + p.getTime()));
+			}
+		}
+		
+		return data;
+	}
+	
 	public boolean match(Signature other) {
 		LinkedList<SignWord> s1 = this.getVerifiableSignature();
 		LinkedList<SignWord> s2 = other.getVerifiableSignature();

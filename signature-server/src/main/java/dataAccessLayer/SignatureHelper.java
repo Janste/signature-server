@@ -3,10 +3,8 @@ package dataAccessLayer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -54,7 +52,7 @@ public class SignatureHelper {
 				b = result.getBytes("signature");
 				ByteArrayInputStream bin = new ByteArrayInputStream(b);
 				ObjectInputStream objIn = new ObjectInputStream(bin);
-				sig = (Signature)objIn.readObject();
+				sig = (Signature) objIn.readObject();
 			}
 			result.close();
 			statement.close();

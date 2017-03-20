@@ -112,4 +112,12 @@ public class DatabaseHandler {
 		return RequestHelper.checkForRequests(connection, user);
 	}
 	
+	public boolean saveSignatureInRequest(SignRequest request) {
+		return RequestHelper.saveSignatureInRequest(connection, request);
+	}
+	
+	public Signature checkIfRequestIsSigned(SignRequest request) {
+		return RequestHelper.checkIfRequestIsSigned(connection, request);
+	}
+	
 }

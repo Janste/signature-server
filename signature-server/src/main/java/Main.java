@@ -41,8 +41,8 @@ public class Main {
         
         post("/register/:uuid", (req, res) -> {
         	String uuid = req.params(":uuid");
-        	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject().get("user").getAsJsonObject();
-        	String token = jsonObject.get("token").getAsString();
+        	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
+        	String token = jsonObject.get("user").getAsJsonObject().get("token").getAsString();
         	JsonArray signature = jsonObject.get("signature").getAsJsonArray();
         	
         	if (signature.size() < 1) {
@@ -62,7 +62,7 @@ public class Main {
             	return "";
         	} else {
         		res.status(401);
-        		res.body("Invalid credentials");
+        		res.body("{\"error\": \"Invalid credentials\" }");
         		return res.body();
         	}
         	
@@ -106,7 +106,7 @@ public class Main {
             	return "";
         	} else {
         		res.status(401);
-        		res.body("Invalid credentials");
+        		res.body("{\"error\": \"Invalid credentials\" }");
         		return res.body();
         	}
         	
@@ -136,34 +136,76 @@ public class Main {
             	return res.body();
         	} else {
         		res.status(401);
-        		res.body("Invalid credentials");
+        		res.body("{\"error\": \"Invalid credentials\" }");
         		return res.body();
         	}
         	
         });
         
-        post("/request/:uuid", (req, res) -> {
+        post("/request/:id", (req, res) -> {
+        	
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
-        	String uuid = req.params(":uuid");
-        	//TODO check token
-        	JsonArray sigObject = jsonObject.get("signature").getAsJsonArray();
-        	Signature sig = new Signature(sigObject);
-        	User user = new User();
-        	user.setUUID(uuid);
-        	Signature storedSig = DatabaseHandler.getInstance().getSignature(user);
-        	if (!storedSig.match(sig)) {
+        	String token = jsonObject.get("user").getAsJsonObject().get("token").getAsString();
+        	String document = req.params(":id");
+        	
+        	Authentication auth = new Authentication();
+        	User user = auth.validateToken(token);
+        	
+        	if (user != null) {
+        		JsonArray sigObject = jsonObject.get("signature").getAsJsonArray();
+            	Signature sig = new Signature(sigObject);
+            	Signature storedSig = DatabaseHandler.getInstance().getSignature(user);
+
+            	if (storedSig == null) {
+            		res.status(401);
+            		res.body("{\"error\": \"Invalid signature\" }"); 
+            	} else if (!storedSig.match(sig)) {
+            		res.status(401);
+            		res.body("{\"error\": \"Invalid signature\" }"); 
+            	}
+            	else {
+            		SignRequest request = new SignRequest();
+            		request.setUUID(Integer.parseInt(user.getUUID()));
+            		request.setDocument(document);
+            		DatabaseHandler.getInstance().saveSignatureInRequest(request);
+            		res.status(200);
+            		res.body("");
+            	}
+        	} else {
         		res.status(401);
-        		res.body("{\"error\": \"Invalid signature\" }"); 
+        		res.body("{\"error\": \"Invalid credentials\" }");
         	}
-        	else {
-        		res.status(200);
-        		res.body("");
-        	}
+        	
         	return res.body();
         });
         
-        get("/request/:uuid", (req, res) -> {
-        	return "get request uuid";
+        get("/request/:id", (req, res) -> {
+        	String token = req.headers("token");
+        	String document = req.params(":id");
+        	
+        	Authentication auth = new Authentication();
+        	User user = auth.validateToken(token);
+        	
+        	if (user != null) {
+        		SignRequest request = new SignRequest();
+        		request.setUUID(Integer.parseInt(user.getUUID()));
+        		request.setDocument(document);
+        		
+        		Signature sig = DatabaseHandler.getInstance().checkIfRequestIsSigned(request);
+        		
+        		if (sig != null) {
+        			res.status(200);
+        			res.body(sig.getAsJsonArray().getAsString());
+        		} else {
+        			res.status(204);
+        			res.body("{\"info\": \"Not signed\" }");
+        		}
+        	} else {
+        		res.status(401);
+        		res.body("{\"error\": \"Invalid credentials\" }");
+        	}
+        	
+        	return res.body();
         });
     }
 }
