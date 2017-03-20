@@ -1,4 +1,7 @@
-import static spark.Spark.*;
+import static spark.Spark.get;
+import static spark.Spark.post;
+
+import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
 
@@ -6,10 +9,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import dataAccessLayer.DatabaseHandler;
 import business.Signature;
 import business.User;
+import dataAccessLayer.DatabaseHandler;
 import utils.Authentication;
+import utils.SignRequest;
 
 public class Main {
     public static void main(String[] args) {
@@ -85,11 +89,57 @@ public class Main {
         });
         
         post("/request", (req, res) -> {
-        	return "post request";
+        	
+        	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
+        	String token = jsonObject.get("user").getAsJsonObject().get("token").getAsString();
+        	String document = jsonObject.get("user").getAsJsonObject().get("document").getAsString();
+        	
+        	Authentication auth = new Authentication();
+        	User user = auth.validateToken(token);
+        	
+        	if (user != null) {
+        		SignRequest signRequest = new SignRequest();
+        		signRequest.setUUID(Integer.parseInt(user.getUUID()));
+        		signRequest.setDocument(document);
+            	DatabaseHandler.getInstance().saveNewRequest(signRequest);
+            	res.status(200);
+            	return "";
+        	} else {
+        		res.status(401);
+        		res.body("Invalid credentials");
+        		return res.body();
+        	}
+        	
         });
         
         get("/request", (req, res) -> {
-        	return "get request";
+        	
+        	String token = req.headers("token");
+        	Authentication auth = new Authentication();
+        	User user = auth.validateToken(token);
+
+        	if (user != null) {
+        		
+        		List<SignRequest> requests = DatabaseHandler.getInstance().checkForRequests(user);
+        		StringBuilder sb = new StringBuilder();
+        		sb.append("{\"requests\":[");
+            	for (int i = 0; i < requests.size(); i++) {
+            		sb.append("\"id\":\"" + requests.get(i).getDocument() + "\"");
+            		if (!(i + 1 == requests.size())) {
+            			sb.append(",");
+            		}
+				}
+            	
+            	sb.append("]}");
+            	res.status(200);
+            	res.body(sb.toString());
+            	return res.body();
+        	} else {
+        		res.status(401);
+        		res.body("Invalid credentials");
+        		return res.body();
+        	}
+        	
         });
         
         post("/request/:uuid", (req, res) -> {

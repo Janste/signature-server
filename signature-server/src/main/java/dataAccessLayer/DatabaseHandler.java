@@ -9,10 +9,12 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Scanner;
 
 import business.Signature;
 import business.User;
+import utils.SignRequest;
 
 public class DatabaseHandler {
 	
@@ -100,6 +102,14 @@ public class DatabaseHandler {
 	
 	public Signature getSignature(User user) {
 		return SignatureHelper.getSignature(connection, user);
+	}
+	
+	public boolean saveNewRequest(SignRequest request) {
+		return RequestHelper.saveNewRequest(connection, request);
+	}
+	
+	public List<SignRequest> checkForRequests(User user) {
+		return RequestHelper.checkForRequests(connection, user);
 	}
 	
 }
