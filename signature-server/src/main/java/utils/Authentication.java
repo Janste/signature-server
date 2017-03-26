@@ -31,6 +31,7 @@ public class Authentication {
 		
 		if (DatabaseHandler.getInstance().saveUser(user)) {
 			user.setUUID(Integer.toString(DatabaseHandler.getInstance().getUserUUID(email)));
+			user.setToken(createToken(user.getEmail()));
 			return user;
 		} else {
 			throw new IllegalArgumentException("Email already in use");

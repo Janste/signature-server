@@ -30,7 +30,7 @@ public class Main {
         	try {
         		User user = auth.register(email, password);
             	res.status(200);
-            	res.body("{\"uuid\":\"" + user.getUUID() + "\"}");
+            	res.body("{\"token\":\"" + user.getToken() + "\",\"uuid\":\"" + user.getUUID() + "\"}");
     			return res.body();
         	} catch (IllegalArgumentException e) {
         		res.status(422);
@@ -41,8 +41,8 @@ public class Main {
         
         post("/register/:uuid", (req, res) -> {
         	String uuid = req.params(":uuid");
+        	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
-        	String token = jsonObject.get("user").getAsJsonObject().get("token").getAsString();
         	JsonArray signature = jsonObject.get("signature").getAsJsonArray();
         	
         	if (signature.size() < 1) {
@@ -89,9 +89,8 @@ public class Main {
         });
         
         post("/request", (req, res) -> {
-        	
+        	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
-        	String token = jsonObject.get("user").getAsJsonObject().get("token").getAsString();
         	String document = jsonObject.get("user").getAsJsonObject().get("document").getAsString();
         	
         	Authentication auth = new Authentication();
@@ -149,9 +148,8 @@ public class Main {
         });
         
         post("/request/:id", (req, res) -> {
-        	
+        	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
-        	String token = jsonObject.get("user").getAsJsonObject().get("token").getAsString();
         	String document = req.params(":id");
         	
         	Authentication auth = new Authentication();
