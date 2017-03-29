@@ -43,7 +43,15 @@ public class Main {
         	String uuid = req.params(":uuid");
         	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
-        	JsonArray signature = jsonObject.get("signature").getAsJsonArray();
+        	JsonArray signatures = jsonObject.get("signature").getAsJsonArray();
+        	
+        	if (signatures.size() < 1) {
+        		res.body("{\"error\": \"Invalid signature\"}");
+        		res.status(422);
+        		return res.body();
+        	}
+        	
+        	JsonArray signature = signatures.get(0).getAsJsonArray();
         	
         	if (signature.size() < 1) {
         		res.body("{\"error\": \"Invalid signature\"}");
@@ -101,7 +109,7 @@ public class Main {
         		signRequest.setUUID(Integer.parseInt(user.getUUID()));
         		signRequest.setDocument(document);
         		if (DatabaseHandler.getInstance().checkIfRequestAlreadyExists(signRequest)) {
-        			res.status(400);
+        			res.status(422);
         			res.body("{\"error\": \"Document already exists\" }");
             		return res.body();
         		} else {
@@ -171,9 +179,14 @@ public class Main {
             		SignRequest request = new SignRequest();
             		request.setUUID(Integer.parseInt(user.getUUID()));
             		request.setDocument(document);
-            		DatabaseHandler.getInstance().saveSignatureInRequest(request);
-            		res.status(200);
-            		res.body("");
+            		if (DatabaseHandler.getInstance().saveSignatureInRequest(request)) {
+            			res.status(200);
+            			res.body("");
+            		}
+            		else {
+            			res.status(404);
+            			res.body("{\"error\": \"Request not found\" }");
+            		}
             	}
         	} else {
         		res.status(401);
@@ -201,7 +214,6 @@ public class Main {
         			res.body(sig.getAsJsonString());
         		} else {
         			res.status(204);
-        			res.body("{\"info\": \"Not signed\" }");
         		}
         	} else {
         		res.status(401);

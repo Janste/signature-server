@@ -88,9 +88,12 @@ public class RequestHelper {
 			ps.setBytes(1, bytes);
 			ps.setInt(2, request.getUUID());
 			ps.setString(3, request.getDocument());
-			ps.executeUpdate();
+			int i = ps.executeUpdate();
 			ps.close();
 			connection.commit();
+			if (i < 1) {
+				return false;
+			}
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
