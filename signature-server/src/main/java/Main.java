@@ -1,9 +1,8 @@
 import static spark.Spark.get;
 import static spark.Spark.post;
+import static spark.Spark.port;
 
 import java.util.List;
-
-import org.apache.log4j.BasicConfigurator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -17,10 +16,10 @@ import utils.SignRequest;
 
 public class Main {
     public static void main(String[] args) {
-    	BasicConfigurator.configure();
+    	port(8001);
     	DatabaseHandler.getInstance();
         
-        post("/register", (req, res) -> {
+        post("/api/register", (req, res) -> {
         	
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
         	String email = jsonObject.get("user").getAsJsonObject().get("email").getAsString();
@@ -39,7 +38,7 @@ public class Main {
         	
         });
         
-        post("/register/:uuid", (req, res) -> {
+        post("/api/register/:uuid", (req, res) -> {
         	String uuid = req.params(":uuid");
         	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
@@ -77,7 +76,7 @@ public class Main {
         	
         });
         
-        post("/login", (req, res) -> {
+        post("/api/login", (req, res) -> {
         	
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
         	String email = jsonObject.get("user").getAsJsonObject().get("email").getAsString();
@@ -96,7 +95,7 @@ public class Main {
         	
         });
         
-        post("/request", (req, res) -> {
+        post("/api/request", (req, res) -> {
         	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
         	String document = jsonObject.get("user").getAsJsonObject().get("document").getAsString();
@@ -125,7 +124,7 @@ public class Main {
         	
         });
         
-        get("/request", (req, res) -> {
+        get("/api/request", (req, res) -> {
         	
         	String token = req.headers("token");
         	Authentication auth = new Authentication();
@@ -155,7 +154,7 @@ public class Main {
         	
         });
         
-        post("/request/:id", (req, res) -> {
+        post("/api/request/:id", (req, res) -> {
         	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
         	String document = req.params(":id");
@@ -196,7 +195,7 @@ public class Main {
         	return res.body();
         });
         
-        get("/request/:id", (req, res) -> {
+        get("/api/request/:id", (req, res) -> {
         	String token = req.headers("token");
         	String document = req.params(":id");
         	
