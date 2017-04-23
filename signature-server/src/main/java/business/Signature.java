@@ -40,18 +40,22 @@ public class Signature implements Serializable {
 	public String getAsJsonString() {
 		
 		StringBuilder sb = new StringBuilder(); 
-		sb.append("[ [ ");
+		sb.append("[ ");
 		
 		for (int i = 0; i < sigData.size(); i++) {
-			for (Point p : sigData.get(i)) {
+			sb.append("[ ");
+			for (int j = 0; j < sigData.get(i).size(); ++j) {
+				Point p = sigData.get(i).get(j);
 				sb.append("{ \"x\":" + p.getX() + ", \"y\":" + p.getY() + ", \"time\": " + p.getTime() + "}");
-				if (!(i + 1 == sigData.size())) {
-        			sb.append(",");
-        		}
+				if (j != sigData.get(i).size() - 1)
+					sb.append(",");
 			}
+			sb.append(" ]");
+			if (i != sigData.size() - 1)
+				sb.append(",");
 		}
 		
-		sb.append("] ]");
+		sb.append(" ]");
 		
 		return sb.toString();
 	}

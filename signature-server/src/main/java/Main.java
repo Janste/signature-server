@@ -42,6 +42,17 @@ public class Main {
     	        });
 
     	before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
+    	
+    	post("/api/test", (req, res) -> {
+    		JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
+        	JsonArray signature = jsonObject.get("signature").getAsJsonArray();	
+        	
+        	Signature sig = new Signature(signature);
+        	
+        	res.status(200);
+        	return sig.getAsJsonString();
+    		
+    	});
         
         post("/api/register", (req, res) -> {
         	
@@ -66,7 +77,7 @@ public class Main {
         	String uuid = req.params(":uuid");
         	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
-        	JsonArray signatures = jsonObject.get("signature").getAsJsonArray();
+        	JsonArray signatures = jsonObject.get("user").getAsJsonObject().get("signatures").getAsJsonArray();
         	
         	if (signatures.size() < 1) {
         		res.body("{\"error\": \"Invalid signature\"}");
@@ -100,6 +111,30 @@ public class Main {
         	
         });
         
+        get("/api/register/:uuid", (req, res) -> {
+        	String token = req.headers("token");
+        	
+        	Authentication auth = new Authentication();
+        	User user = auth.validateToken(token);
+        	
+        	if (user != null) {
+            	Signature storedSig = DatabaseHandler.getInstance().getSignature(user);
+            	if (storedSig != null) {
+            		res.status(200);
+            		return storedSig.getAsJsonString();
+            	}
+        	}
+        	else {
+        		res.status(401);
+        		res.body("{\"error\": \"Invalid credentials\" }");
+        		return res.body();
+        	}
+        	res.status(404);
+        	res.body("{\"error\": \"No signature uploaded\" }");
+        	return res.body();
+        	
+        });
+        
         post("/api/login", (req, res) -> {
         	
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
@@ -122,7 +157,7 @@ public class Main {
         post("/api/request", (req, res) -> {
         	String token = req.headers("token");
         	JsonObject jsonObject = new JsonParser().parse(req.body()).getAsJsonObject();
-        	String document = jsonObject.get("user").getAsJsonObject().get("document").getAsString();
+        	String document = jsonObject.get("document").getAsJsonObject().get("id").getAsString();
         	
         	Authentication auth = new Authentication();
         	User user = auth.validateToken(token);
@@ -160,7 +195,7 @@ public class Main {
         		StringBuilder sb = new StringBuilder();
         		sb.append("{\"requests\":[");
             	for (int i = 0; i < requests.size(); i++) {
-            		sb.append("\"id\":\"" + requests.get(i).getDocument() + "\"");
+            		sb.append("{\"id\":\"" + requests.get(i).getDocument() + "\"}");
             		if (!(i + 1 == requests.size())) {
             			sb.append(",");
             		}
